@@ -1,0 +1,36 @@
+name: event-manager
+services:
+  eventmanagement:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      db:
+        condition: service_healthy
+    image: eventmanagement
+    ports:
+      - "8080:8080"
+    build:
+      context: ..
+      dockerfile: Docker/Dockerfile
+  
+  db:
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U test -d eventmanagement" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    environment:
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_DB=eventmanagement
+    volumes:
+      - db:/var/lib/postgresql/data
+
+volumes:
+  db:
+    driver: local
+
