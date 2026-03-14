@@ -59,5 +59,25 @@ namespace Core.Api.Controllers
 
             return BadRequest(result.Error!);
         }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<EventResponse>> UpdateEvent(Guid id, [FromBody] UpdateEventRequest request)
+        {
+            // Bit weird to have both ids, but I consider this a type of guard
+            // Are you trying to update what you are claiming
+            if (id == Guid.Empty)
+            {
+                return BadRequest("Invalid Id Requested");
+            }
+
+            if (id != request.Id)
+            {
+                return BadRequest($"Id mismatch, provided both {id} and {request.Id}");
+            }
+
+            var result = await _eventsService.UpdateEvent(request.Id, request);
+
+            return result.IsSuccess ? Ok(result.Value!) : NotFound(result.Error!);
+        }
     }
 }

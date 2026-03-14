@@ -165,4 +165,60 @@ public class EventControllerTests
         Assert.Equal(errorMessage, badRequestResult.Value);
     }
 
+    [Fact]
+    public async Task UpdateEvent_ReturnsBadRequest_WhenIdsMismatch()
+    {
+        var urlId = Guid.NewGuid();
+        var bodyId = Guid.NewGuid();
+        var request = new UpdateEventRequest(bodyId,
+            "Updated Name",
+            null,
+            null,
+            null,
+            null);
+
+        var result = await _controller.UpdateEvent(urlId, request);
+
+        Assert.IsType<BadRequestObjectResult>(result.Result);
+    }
+
+    [Fact]
+    public async Task UpdateEvent_ReturnsBadRequest_WhenUrlIdIsEmpty()
+    {
+        var urlId = Guid.Empty;
+        var bodyId = Guid.NewGuid();
+        var request = new UpdateEventRequest(bodyId,
+            "Updated Name",
+            null,
+            null,
+            null,
+            null);
+
+        var result = await _controller.UpdateEvent(urlId, request);
+
+        Assert.IsType<BadRequestObjectResult>(result.Result);
+    }
+
+    [Fact]
+    public async Task UpdateEvent_ReturnsNotFound_WhenEventDoesNotExist()
+    {
+        var eventId = Guid.NewGuid();
+        var request = new UpdateEventRequest(eventId,
+            "Updated Name",
+            null,
+            null,
+            null,
+            null);
+        var error = "Test Error";
+
+        _mockService
+            .Setup(s => s.UpdateEvent(eventId, request))
+            .ReturnsAsync(Result<EventResponse>.Fail(error));
+
+        var result = await _controller.UpdateEvent(eventId, request);
+
+        var notFoundResult = Assert.IsType<NotFoundObjectResult>(result.Result);
+        Assert.Equal(error, notFoundResult.Value);
+    }
+
 }
