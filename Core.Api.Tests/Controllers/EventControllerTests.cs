@@ -1,0 +1,111 @@
+using System;
+using Core.Api.Controllers;
+using Core.Application.Events.Services;
+using Domain.Shared;
+using Microsoft.AspNetCore.Mvc;
+using Moq;
+
+namespace Core.Api.Tests.Controllers;
+
+public class EventControllerTests
+{
+    private readonly Mock<IEventsService> _mockService;
+    private readonly EventsController _controller;
+
+    public EventControllerTests()
+    {
+        _mockService = new Mock<IEventsService>();
+
+        _controller = new EventsController(_mockService.Object);
+    }
+    [Fact]
+    public async Task GetAlLEvents_ReturnsOK_WhenEventsExists()
+    {
+        var events = new List<EventResponse>
+        {
+            new EventResponse(Guid.NewGuid(), "Test Event 1", "Test Description 1", "Test Venue 1", DateTime.UtcNow.AddDays(1), 100),
+            new EventResponse(Guid.NewGuid(), "Test Event 2", "Test Description 2", "Test Venue 2", DateTime.UtcNow.AddDays(2), 200)
+        };
+        var successfulResult = Result<IList<EventResponse>>.Success(events);
+
+        _mockService
+            .Setup(s => s.GetAllEvents())
+            .ReturnsAsync(successfulResult);
+
+        var result = await _controller.GetEvents();
+
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var returnedEvents = Assert.IsType<List<EventResponse>>(okResult.Value);
+        Assert.Equal(2, returnedEvents.Count);
+    }
+
+    [Fact]
+    public async Task GetAllEvents_ReturnsOKWithEmptyList_WhenEventsDontExist()
+    {
+        var emptyList = new List<EventResponse>();
+        var successfulResult = Result<IList<EventResponse>>.Success(emptyList);
+
+        _mockService
+            .Setup(s => s.GetAllEvents())
+            .ReturnsAsync(successfulResult);
+
+        var result = await _controller.GetEvents();
+
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var returnedEvents = Assert.IsType<List<EventResponse>>(okResult.Value);
+        Assert.Empty(returnedEvents);
+    }
+
+    [Fact]
+    public async Task GetEvent_ReturnsOk_WhenEventExists()
+    {
+        var eventId = Guid.NewGuid();
+        var name = "TestName";
+        var desc = "TestDesc";
+        var venue = "TestVenue";
+        var eventDate = DateTime.UtcNow.AddDays(1);
+        var capacity = 10;
+        var eventResponse = new EventResponse(eventId, name, desc, venue, eventDate, capacity);
+        var successfulResult = Result<EventResponse>.Success(eventResponse);
+
+        _mockService
+            .Setup(s => s.GetEventById(eventId))
+            .ReturnsAsync(successfulResult);
+
+        var result = await _controller.GetEvent(eventId);
+
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var returnedEvent = Assert.IsType<EventResponse>(okResult.Value);
+        Assert.Equal(eventId, returnedEvent.Id);
+        Assert.Equal(name, returnedEvent.Name);
+    }
+
+    [Fact]
+    public async Task GetEvent_ReturnsNotFound_WhenEventDoesNotExist()
+    {
+        var eventId = Guid.NewGuid();
+        var errorMessage = "Test Error Message";
+        var resultError = Result<EventResponse>.Fail(errorMessage);
+
+        _mockService
+            .Setup(s => s.GetEventById(eventId))
+            .ReturnsAsync(resultError);
+
+        var result = await _controller.GetEvent(eventId);
+
+        var notFoundResult = Assert.IsType<NotFoundObjectResult>(result.Result);
+        var returnedMessage = Assert.IsType<string>(notFoundResult.Value);
+        Assert.Equal(returnedMessage, errorMessage);
+    }
+
+    [Fact]
+    public async Task GetEvent_ReturnsBadRequest_WhenEmptyGuidSupplied()
+    {
+        var eventId = Guid.Empty;
+
+        var result = await _controller.GetEvent(eventId);
+
+        Assert.IsType<BadRequestObjectResult>(result.Result);
+    }
+
+}

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+using Core.Application.Events.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Core.Api.Controllers
@@ -7,11 +7,43 @@ namespace Core.Api.Controllers
     [ApiController]
     public class EventsController : ControllerBase
     {
+        private readonly IEventsService _eventsService;
+
+        public EventsController(IEventsService eventsService)
+        {
+            _eventsService = eventsService;
+        }
 
         [HttpGet("ping")]
         public IActionResult Ping()
         {
             return Ok(new { Timestamp = DateTime.UtcNow });
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<List<EventResponse>>> GetEvents()
+        {
+            var result = await _eventsService.GetAllEvents();
+
+            // Returning this because it will either be a full list
+            // Or Default to an empty response (which for a GetAll is better, as it doesn't reveal anything
+            // about the internal size of the data set
+            return Ok(result.Value);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<EventResponse>> GetEvent(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                return BadRequest("Invalid Id Requested");
+            }
+
+            var result = await _eventsService.GetEventById(id);
+
+            return result.IsSuccess
+                ? Ok(result.Value)
+                : NotFound(result.Error!);
         }
     }
 }
