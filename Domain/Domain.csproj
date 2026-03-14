@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Folder Include="Shared/" />
+    <Folder Include="Tickets/" />
   </ItemGroup>
 
 </Project>
