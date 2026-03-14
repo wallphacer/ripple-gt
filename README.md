@@ -65,6 +65,22 @@ It has some drawbacks too, but for this sort of purpose it works well!
 
 ## Decisions
 
+### General Structure
+
+I decided to go for a fairly typical structure for a .NET Web Project (at least typical in my experience).
+
+An API Layer, that handles simple validation & request / response.
+A Service Layer, that handles internal business logic.
+A Repository, for data access to separate database accessing from operating on the entities.
+A Domain project, to contain Entity's and their logic.
+A Infrastructure project, to contain the configuration for database access along with the configuration for the Entities and migrations to the database.
+
+### Controllers over Minimal API
+
+This is just a preference.
+I find controllers more manageable, and have more experience.
+For a two hour test I thought it best to do what's most comfortable.
+
 ### EF Core
 
 I decided to use EF Core / an ORM over something like Dapper, or writing my own SQL files to generate / create the tables.
