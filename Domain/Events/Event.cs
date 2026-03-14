@@ -10,4 +10,16 @@ public class Event
     public string Venue { get; set; } = string.Empty;
     public DateTime EventDate { get; set; }
     public int TotalCapacity { get; set; }
+
+    public static Event Create(string name, string description, string venue, DateTime eventDate, int totalCapacity)
+    {
+        return new Event
+        {
+            Name = name,
+            Description = description,
+            Venue = venue,
+            EventDate = eventDate,
+            TotalCapacity = totalCapacity
+        };
+    }
 }
