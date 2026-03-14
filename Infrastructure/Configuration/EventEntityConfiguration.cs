@@ -36,5 +36,8 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
             .WithOne(pt => pt.Event)
             .HasForeignKey(pt => pt.EventId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(e => e.Venue);
+        builder.HasIndex(e => e.EventDate);
     }
 }

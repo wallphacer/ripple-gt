@@ -28,7 +28,9 @@ public class PricingTierConfiguration : IEntityTypeConfiguration<PricingTier>
         builder.Property(pt => pt.Capacity)
             .IsRequired();
 
-        builder.Property(p => p.Version)
+        builder.Property(pt => pt.Version)
             .IsConcurrencyToken();
+
+        builder.HasIndex(pt => pt.EventId);
     }
 }

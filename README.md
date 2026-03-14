@@ -105,6 +105,23 @@ I decided to just use Results here for this, but it isn't perfect as the control
 
 This is something that would need to be addressed in the future if this was going to production.
 
+### Indexes
+
+I added indexes to a few fields that I assumed would be a high query field.
+
+Event:
+
+- Venue
+- Date
+
+PricingTier:
+
+- EventId
+
+Ticket:
+
+- PricingTierId
+
 ### Preventing Overselling
 
 The main contention behind overselling is ensuring that two writes on the final ticket don't come in at the same time.
@@ -156,7 +173,7 @@ As I mentioned previously, the Result pattern I used here is incomplete.
 It is returning information for sure but I've not made the endpoints aware of the types of Results coming back.
 
 This was mostly due to time.
-If I had more time I would add in more knwoledge of this, maybe an enum to denote the type of error or something similar.
+If I had more time I would add in more knowledge of this, maybe an enum to denote the type of error or something similar.
 This would enable me to more accurately use the HTTP Response Codes to denote what's actually being returned.
 
 ### Validation
@@ -166,7 +183,7 @@ I would also use ProblemDetails to normalise the responses from the API.
 
 For this I decided simple if statements & data attributes would be sufficient for this.
 
-Normally I dislike using the DataAnnations because it adds in a layer of API / Request Response knowledge to entities that I think are better not knowing anything about that.
+Normally I dislike using the DataAnnotations because it adds in a layer of API / Request Response knowledge to entities that I think are better not knowing anything about that.
 It makes their definitions busy and I like them to be really easily read. The noise makes it a bit harder to fully understand what's going on (not impossible, just much harder).
 
 ### Swagger Documentation
@@ -183,7 +200,7 @@ I have also not instrumented any observability.
 
 In a production environment this would be a much higher priority.
 I typically prefer to have a walking skeleton of this sort of thing very early in the project.
-It means that we are building in ovservability and intentional logging as we build.
+It means that we are building in observability and intentional logging as we build.
 
 I have not added any here to ensure I could focus on features.
 

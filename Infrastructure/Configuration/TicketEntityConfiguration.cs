@@ -25,5 +25,6 @@ public class TicketConfiguration : IEntityTypeConfiguration<Ticket>
 
 
         builder.HasIndex(t => t.CustomerEmail);
+        builder.HasIndex(t => t.PricingTierId);
     }
 }
