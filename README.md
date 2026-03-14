@@ -23,7 +23,7 @@ Building an application with infrastructure and the knowledge of how it well get
 ### Clone the Repo
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/wallphacer/ripple-gt
 ```
 
 ### Get To The Docker Folder
@@ -229,8 +229,7 @@ I unfortunately did not get to finish this.
 One thing I did do in preparation for this feature was capture the cost paid by the user on the Ticket entity. This means that eventually, if a PricingTier was updated, the actual cost paid by the user would have still been captured on the original record to prevent alterations in costs / problems with reporting down the line.
 
 I did a simple delete & replace for this but it was causing tracking issues with EF Core that frankly wasn't worth spending a ton of time on during this test.
-
-## I would have solved this by merging rather than delete and replace.
+I would have solved this by merging rather than delete and replace.
 
 ## AI Usage
 
