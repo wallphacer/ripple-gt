@@ -46,8 +46,6 @@ public class EventsService : IEventsService
             return Result<EventResponse>.Fail($"Could not find Event with Id={id}");
         }
 
-        // Only update what has changed in the request
-        // 
         existingEvent.Name = request.Name ?? existingEvent.Name;
         existingEvent.Description = request.Description ?? existingEvent.Description;
         existingEvent.Venue = request.Venue ?? existingEvent.Venue;
@@ -57,6 +55,8 @@ public class EventsService : IEventsService
         {
             existingEvent.TotalCapacity = request.TotalCapacity.Value;
         }
+
+        //TODO: Update Pricing Tiers (will require a merge)
 
         await _eventsRepository.UpdateAsync(existingEvent);
 
@@ -71,6 +71,15 @@ public class EventsService : IEventsService
             request.StartTime,
             request.TotalCapacity);
 
+        foreach (var tier in request.PricingTiers)
+        {
+            var result = createdEvent.AddPricingTier(tier.Name, tier.CostInCents, tier.Capacity);
+
+            if (!result.IsSuccess)
+            {
+                return Result<EventResponse>.Fail(result.Error!);
+            }
+        }
 
         await _eventsRepository.AddAsync(createdEvent);
 

@@ -1,4 +1,5 @@
-using System;
+using Domain.Shared;
+using Domain.Tickets;
 
 namespace Core.Application.DTO.Responses;
 
@@ -23,5 +24,22 @@ public record PurchasedTicket(
             ticket.PricingTier.Name,
             ticket.CostPaidInCents,
             ticket.CostPaidInCents / 100m);
+    }
+}
+
+public record TicketAvailability(List<PricingTierAvailability> TierAvailabilities)
+{
+    public static TicketAvailability ToExternal(List<PricingTier> pricingTiers)
+    {
+        var pricingTierAvailabilities = pricingTiers.Select(PricingTierAvailability.ToExternal).ToList();
+        return new TicketAvailability(pricingTierAvailabilities);
+    }
+}
+
+public record PricingTierAvailability(int CapacityLeft, string Name)
+{
+    public static PricingTierAvailability ToExternal(PricingTier tier)
+    {
+        return new PricingTierAvailability(tier.AvailableTickets, tier.Name);
     }
 }

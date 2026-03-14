@@ -1,23 +1,61 @@
-using System;
-using Core.Api.Controllers;
 using Core.Application.DTO.Requests;
 using Core.Application.DTO.Responses;
-using Core.Application.DTO.Tickets.Services;
+using Core.Application.Tickets.Services;
 using Domain.Shared;
+using EventManagement.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using Xunit;
 
 namespace Core.Api.Tests.Controllers;
 
 public class TicketsControllerTests
 {
-    private readonly Mock<ITicketsService> _mockService;
+    private readonly Mock<ITicketService> _mockService;
     private readonly TicketsController _controller;
 
     public TicketsControllerTests()
     {
-        _mockService = new Mock<ITicketsService>();
+        _mockService = new Mock<ITicketService>();
         _controller = new TicketsController(_mockService.Object);
+    }
+
+    [Fact]
+    public async Task GetAvailability_ReturnsOk_WhenEventExists()
+    {
+        var eventId = Guid.NewGuid();
+        var availability = new TicketAvailability(new List<PricingTierAvailability>
+        {
+            new PricingTierAvailability(50, "VIP"),
+            new PricingTierAvailability(100, "General")
+        });
+
+        _mockService
+            .Setup(s => s.GetTicketAvailability(eventId))
+            .ReturnsAsync(Result<TicketAvailability>.Success(availability));
+
+        var result = await _controller.GetTicketAvailability(eventId);
+
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var returnedValue = Assert.IsType<TicketAvailability>(okResult.Value);
+        Assert.Equal(2, returnedValue.TierAvailabilities.Count);
+        Assert.Equal("VIP", returnedValue.TierAvailabilities[0].Name);
+    }
+
+    [Fact]
+    public async Task GetAvailability_ReturnsNotFound_WhenEventDoesNotExist()
+    {
+        var eventId = Guid.NewGuid();
+        var errorMessage = "Test Error";
+
+        _mockService
+            .Setup(s => s.GetTicketAvailability(eventId))
+            .ReturnsAsync(Result<TicketAvailability>.Fail(errorMessage));
+
+        var result = await _controller.GetTicketAvailability(eventId);
+
+        var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+        Assert.Equal(errorMessage, notFoundResult.Value);
     }
 
     [Fact]

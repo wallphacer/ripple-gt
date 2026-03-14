@@ -63,6 +63,13 @@ It has some drawbacks too, but for this sort of purpose it works well!
 
 ## Assumptions
 
+This is just some of the assumptions I made as part of this test.
+I made these purely based on the time it would take to solve, in a real world environment I'd be directing a lot of the questions surrounding these assumptions to a customer, product owner or stake holder to get the most accurate definition of what needs to be done.
+
+- Scale: I assumed a moderate scale, so not TicketMaster or anything similar. That sort of scale would require a vaster degree of infrastructure and orchestration.
+- Single Region: This was purely to simplify the design here. A globally distributed system introduces a lot more challenges around consistency.
+- Single Instance: The RowVersion concurrency would not work for horizontal scaling, or at least would introduce a lot more problems. If there were more instances it would require a lot more care and thought into how a user gets their tickets.
+
 ## Decisions
 
 ### General Structure
@@ -145,14 +152,88 @@ Nor would I be setting the connection strings so directly in the appsettings eit
 
 ### Result Pattern
 
+As I mentioned previously, the Result pattern I used here is incomplete.
+It is returning information for sure but I've not made the endpoints aware of the types of Results coming back.
+
+This was mostly due to time.
+If I had more time I would add in more knwoledge of this, maybe an enum to denote the type of error or something similar.
+This would enable me to more accurately use the HTTP Response Codes to denote what's actually being returned.
+
 ### Validation
+
+Normally I would use something like FluentValidation and collect all of the validation rules into a single class for the endpoints.
+I would also use ProblemDetails to normalise the responses from the API.
+
+For this I decided simple if statements & data attributes would be sufficient for this.
+
+Normally I dislike using the DataAnnations because it adds in a layer of API / Request Response knowledge to entities that I think are better not knowing anything about that.
+It makes their definitions busy and I like them to be really easily read. The noise makes it a bit harder to fully understand what's going on (not impossible, just much harder).
 
 ### Swagger Documentation
 
+There's a lot of documentation / swagger specification style attributes I have not added.
+For example, the ProduceResponse attributes and Examples to help enrich the swagger documentation.
+
+I elected to ignore that for this task to focus on features.
+
 ### Logging & Observability
+
+I have not added any logging to this take home test.
+I have also not instrumented any observability.
+
+In a production environment this would be a much higher priority.
+I typically prefer to have a walking skeleton of this sort of thing very early in the project.
+It means that we are building in ovservability and intentional logging as we build.
+
+I have not added any here to ensure I could focus on features.
 
 ### Users & Auth
 
----
+Obviously there's absolutely zero authentication or authorization on any of this.
+It would need specific users / roles based on if you were administrating the system and adding events vs a customer who was purchasing and viewing tickets.
+
+This is not something I've even approached here but would be vital in a production application.
+
+### Reporting
+
+I unfortunately did not have enough time to get to reporting during the time I spent on this task.
+
+This would be a read-only (so NoTracking()) GET endpoint that would sort out the following:
+
+- Total tickets sold
+- Revenue broken down by pricing tier
+- Remaining availability per tier
+
+I think the additional DTO's and Request / Response objects, as well as the service + tests would have required a lot of additional time for me.
+
+### Update PricingTier & Merging
+
+I unfortunately did not get to finish this.
+One thing I did do in preparation for this feature was capture the cost paid by the user on the Ticket entity. This means that eventually, if a PricingTier was updated, the actual cost paid by the user would have still been captured on the original record to prevent alterations in costs / problems with reporting down the line.
+
+I did a simple delete & replace for this but it was causing tracking issues with EF Core that frankly wasn't worth spending a ton of time on during this test.
+
+## I would have solved this by merging rather than delete and replace.
 
 ## AI Usage
+
+I did use AI for this task.
+Also can I just say, I've done some other take home assignments and this one was really refreshing.
+It was very open, and giving this sort of flexbility meant it was a lot more enjoyable that other's I've done!
+
+Anyways.
+I used AI in two main regards:
+
+- Boilerplate
+- Repetitive Generation
+
+I much prefer having more control over the actual ins and outs of whats going on, and a thorough understanding of the internals of how something is being solved.
+I allowed AI to generate the skeleton of many of the endpoints, as well as the skeleton of some of unit tests.
+Things I never allow AI to do:
+
+- Define Test Cases
+- Fully "One Shot" features
+
+I typically constrict the AI to more localised areas, a single file or something similar, so that I provide the context of what needs to be done as well as the safety guards.
+
+I also made sure I wrote all of this documentation (so that my personality came through).

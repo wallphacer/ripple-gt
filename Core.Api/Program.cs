@@ -1,5 +1,6 @@
 using Core.Application.Events;
 using Core.Application.Events.Services;
+using Core.Application.Tickets.Services;
 using Infrastructure;
 using Infrastructure.Configuration;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,7 @@ builder.Services.AddDbContext<EventManagementDbContext>(options =>
 
 builder.Services.AddScoped<IEventsService, EventsService>();
 builder.Services.AddScoped<IEventsRepository, EventsRepository>();
+builder.Services.AddScoped<ITicketService, TicketService>();
 
 var app = builder.Build();
 
@@ -40,6 +42,5 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<EventManagementDbContext>();
     await db.Database.MigrateAsync();
 }
-
 
 app.Run();

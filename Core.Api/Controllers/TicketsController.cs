@@ -1,28 +1,23 @@
 using Core.Application.DTO.Requests;
-using Core.Application.DTO.Tickets.Services;
-using Domain.Tickets;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
+using Core.Application.Tickets.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Core.Api.Controllers;
+namespace EventManagement.Controllers;
 
-[Route("api/[controller]")]
 [ApiController]
+[Route("api/[controller]")]
 public class TicketsController : ControllerBase
 {
-
-    private readonly ITicketsService _ticketService;
-
-    public TicketsController(ITicketsService ticketsService)
+    private readonly ITicketService _ticketService;
+    public TicketsController(ITicketService ticketService)
     {
-        _ticketService = ticketsService;
+        _ticketService = ticketService;
     }
 
     [HttpGet("ping")]
     public IActionResult Ping()
     {
-        return Ok(new { Timestamp = DateTime.UtcNow });
+        return Ok();
     }
 
     [HttpPost("purchase")]
@@ -47,5 +42,22 @@ public class TicketsController : ControllerBase
 
         return BadRequest(result.Error);
     }
-}
 
+    [HttpGet("availability/{id}")]
+    public async Task<IActionResult> GetTicketAvailability(Guid id)
+    {
+        if (id == Guid.Empty)
+        {
+            return BadRequest("Id cannot be Empty");
+        }
+
+        var result = await _ticketService.GetTicketAvailability(id);
+
+        if (!result.IsSuccess)
+        {
+            return NotFound(result.Error);
+        }
+
+        return Ok(result.Value);
+    }
+}
