@@ -1,3 +1,4 @@
+using Core.Application.DTO;
 using Core.Application.Events.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,6 +45,19 @@ namespace Core.Api.Controllers
             return result.IsSuccess
                 ? Ok(result.Value)
                 : NotFound(result.Error!);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<EventResponse>> CreateEvent([FromBody] CreateEventRequest request)
+        {
+            var result = await _eventsService.AddEvent(request);
+
+            if (result.IsSuccess)
+            {
+                return CreatedAtAction(nameof(GetEvent), new { id = result.Value!.Id }, result.Value);
+            }
+
+            return BadRequest(result.Error!);
         }
     }
 }

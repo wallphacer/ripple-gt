@@ -1,5 +1,6 @@
 using System;
 using Core.Api.Controllers;
+using Core.Application.DTO;
 using Core.Application.Events.Services;
 using Domain.Shared;
 using Microsoft.AspNetCore.Mvc;
@@ -106,6 +107,62 @@ public class EventControllerTests
         var result = await _controller.GetEvent(eventId);
 
         Assert.IsType<BadRequestObjectResult>(result.Result);
+    }
+
+    [Fact]
+    public async Task CreateEvent_ReturnsCreatedAtAction_WhenSuccessful()
+    {
+        var request = new CreateEventRequest(
+            "Test Name",
+            "Test Description",
+            "Test Venue",
+            DateTime.UtcNow.AddDays(1),
+            100);
+
+        var eventResponse = new EventResponse(
+            Guid.NewGuid(),
+            request.Name,
+            request.Description,
+            request.Venue,
+            request.StartTime,
+            request.TotalCapacity);
+
+        var successfulResult = Result<EventResponse>.Success(eventResponse);
+
+        _mockService
+            .Setup(s => s.AddEvent(request))
+            .ReturnsAsync(successfulResult);
+
+        var result = await _controller.CreateEvent(request);
+
+        var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(result.Result);
+        var returnedEvent = Assert.IsType<EventResponse>(createdAtActionResult.Value);
+
+        Assert.Equal(nameof(_controller.GetEvent), createdAtActionResult.ActionName);
+        Assert.Equal(request.Name, returnedEvent.Name);
+    }
+
+    [Fact]
+    public async Task CreateEvent_ReturnsBadRequest_WhenServiceFails()
+    {
+        var request = new CreateEventRequest(
+            "Test Name",
+            "Test Description",
+            "Test Venue",
+            DateTime.UtcNow.AddDays(1),
+            100);
+        var errorMessage = "Test Error Message";
+        var failedResult = Result<EventResponse>.Fail(errorMessage);
+
+        _mockService
+            .Setup(s => s.AddEvent(request))
+            .ReturnsAsync(failedResult);
+
+        var result = await _controller.CreateEvent(request);
+
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+
+        Assert.Equal(errorMessage, badRequestResult.Value);
     }
 
 }
