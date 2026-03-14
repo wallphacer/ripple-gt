@@ -1,5 +1,6 @@
 
-using Core.Application.DTO;
+using Core.Application.DTO.Requests;
+using Core.Application.DTO.Responses;
 using Domain.Shared;
 
 namespace Core.Application.Events.Services;

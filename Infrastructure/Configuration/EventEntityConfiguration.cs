@@ -1,4 +1,5 @@
 using Domain.Events;
+using Domain.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -30,5 +31,10 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
 
         builder.Property(e => e.TotalCapacity)
             .IsRequired();
+
+        builder.HasMany<PricingTier>(e => e.PricingTiers)
+            .WithOne(pt => pt.Event)
+            .HasForeignKey(pt => pt.EventId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

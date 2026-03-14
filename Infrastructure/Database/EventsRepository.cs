@@ -49,6 +49,7 @@ public class EventsRepository : IEventsRepository
         return true;
     }
 
+    // This function looks ridiculous, but it keeps the interface and API of the repository consistent.
     public async Task<Event?> UpdateAsync(Event eventToUpdate)
     {
         await _context.SaveChangesAsync();

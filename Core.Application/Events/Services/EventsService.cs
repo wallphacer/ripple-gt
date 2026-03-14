@@ -1,5 +1,5 @@
-using System;
-using Core.Application.DTO;
+using Core.Application.DTO.Requests;
+using Core.Application.DTO.Responses;
 using Domain.Events;
 using Domain.Shared;
 

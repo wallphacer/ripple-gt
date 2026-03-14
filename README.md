@@ -100,7 +100,42 @@ This is something that would need to be addressed in the future if this was goin
 
 ### Preventing Overselling
 
-## Changes I Would Make
+The main contention behind overselling is ensuring that two writes on the final ticket don't come in at the same time.
+In a perfect world, we would understand a lot about the system ahead of this:
+
+- How many tickets are there going to be available
+- How popular is this event, is it likely there'll be thousands, hundreds of thousands or millions of people attempting to purchase tickets all at the same time
+- How globally distributed will this connection be
+
+For the purposes of this test, I've made some assumptions about the system, and solved the problem in a way that I don't think is necessarily the most optimal way.
+Given that this is meant to be roughly two hours though I think that's ok.
+
+I'm going to use a RowVersion or something similar in EF Core to track changes.
+This means if two people read that there's one ticket left and attempt to purchase it, whoever writes first will update RowVersion (from say 1 to 2).
+The second user will attempt to insert a ticket given that the RowVersion is still 1.
+
+This has lots of cons.
+It means the user gets kicked out at purchase time, which would send me into a fit of rage.
+I chose this over something else, like row locking, because this would prevent even reading if any tickets are available, which is also infuriating but I think keeping reads open as much as possible is a good thing.
+
+In a production environment you'd use some kind of reservation system.
+You'd get a ticket with a timer and if you don't purchase your ticket in time it goes back out to the rest of the people waiting for availability.
+
+#### Why not use PostgreSQL's inbuilt type for this
+
+I know that Postgres has it's own RowVersion handling that you can use. It's as easy to configure but you don't have to update the version yourself.
+
+I don't like doing this personally.
+
+- I've had to change database providers a few times on a few projects, and each time remembering to update stuff like this is a pain.
+- Postgres doesn't show you this value, which means it's harder to see what version was happening at specific times. I'd rather be able to see it.
+
+I know it's nice it does it for you, but I'd rather just do it myself for the flexibility, and to avoid trying to debug it.
+I didn't want to spend 30 minutes of this two hour exericse double checking some internal PostgreSQL numbers if I was getting concurrency issues :/
+
+---
+
+## Changes I Would Make / Next Steps
 
 ### Configuration Of Secrets
 
@@ -108,4 +143,16 @@ For the purposes of this I'm taking a few liberties with this.
 Obviously in production I wouldn't be passing users and passwords directly to our database configuration in docker.
 Nor would I be setting the connection strings so directly in the appsettings either.
 
-## Next Steps
+### Result Pattern
+
+### Validation
+
+### Swagger Documentation
+
+### Logging & Observability
+
+### Users & Auth
+
+---
+
+## AI Usage

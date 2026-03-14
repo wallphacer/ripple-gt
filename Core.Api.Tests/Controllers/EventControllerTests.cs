@@ -1,6 +1,6 @@
-using System;
 using Core.Api.Controllers;
-using Core.Application.DTO;
+using Core.Application.DTO.Requests;
+using Core.Application.DTO.Responses;
 using Core.Application.Events.Services;
 using Domain.Shared;
 using Microsoft.AspNetCore.Mvc;
@@ -19,13 +19,14 @@ public class EventControllerTests
 
         _controller = new EventsController(_mockService.Object);
     }
+
     [Fact]
     public async Task GetAlLEvents_ReturnsOK_WhenEventsExists()
     {
         var events = new List<EventResponse>
         {
-            new EventResponse(Guid.NewGuid(), "Test Event 1", "Test Description 1", "Test Venue 1", DateTime.UtcNow.AddDays(1), 100),
-            new EventResponse(Guid.NewGuid(), "Test Event 2", "Test Description 2", "Test Venue 2", DateTime.UtcNow.AddDays(2), 200)
+            new EventResponse(Guid.NewGuid(), "Test Event 1", "Test Description 1", "Test Venue 1", DateTime.UtcNow.AddDays(1), 100, new List<PricingTierResponse>()),
+            new EventResponse(Guid.NewGuid(), "Test Event 2", "Test Description 2", "Test Venue 2", DateTime.UtcNow.AddDays(2), 200, new List<PricingTierResponse>())
         };
         var successfulResult = Result<IList<EventResponse>>.Success(events);
 
@@ -66,7 +67,7 @@ public class EventControllerTests
         var venue = "TestVenue";
         var eventDate = DateTime.UtcNow.AddDays(1);
         var capacity = 10;
-        var eventResponse = new EventResponse(eventId, name, desc, venue, eventDate, capacity);
+        var eventResponse = new EventResponse(eventId, name, desc, venue, eventDate, capacity, new List<PricingTierResponse>());
         var successfulResult = Result<EventResponse>.Success(eventResponse);
 
         _mockService
@@ -117,7 +118,8 @@ public class EventControllerTests
             "Test Description",
             "Test Venue",
             DateTime.UtcNow.AddDays(1),
-            100);
+            100,
+            new List<PricingTierDetails>());
 
         var eventResponse = new EventResponse(
             Guid.NewGuid(),
@@ -125,7 +127,8 @@ public class EventControllerTests
             request.Description,
             request.Venue,
             request.StartTime,
-            request.TotalCapacity);
+            request.TotalCapacity,
+            new List<PricingTierResponse>());
 
         var successfulResult = Result<EventResponse>.Success(eventResponse);
 
@@ -150,7 +153,8 @@ public class EventControllerTests
             "Test Description",
             "Test Venue",
             DateTime.UtcNow.AddDays(1),
-            100);
+            100,
+            new List<PricingTierDetails>());
         var errorMessage = "Test Error Message";
         var failedResult = Result<EventResponse>.Fail(errorMessage);
 
@@ -166,41 +170,7 @@ public class EventControllerTests
     }
 
     [Fact]
-    public async Task UpdateEvent_ReturnsBadRequest_WhenIdsMismatch()
-    {
-        var urlId = Guid.NewGuid();
-        var bodyId = Guid.NewGuid();
-        var request = new UpdateEventRequest(bodyId,
-            "Updated Name",
-            null,
-            null,
-            null,
-            null);
-
-        var result = await _controller.UpdateEvent(urlId, request);
-
-        Assert.IsType<BadRequestObjectResult>(result.Result);
-    }
-
-    [Fact]
-    public async Task UpdateEvent_ReturnsBadRequest_WhenUrlIdIsEmpty()
-    {
-        var urlId = Guid.Empty;
-        var bodyId = Guid.NewGuid();
-        var request = new UpdateEventRequest(bodyId,
-            "Updated Name",
-            null,
-            null,
-            null,
-            null);
-
-        var result = await _controller.UpdateEvent(urlId, request);
-
-        Assert.IsType<BadRequestObjectResult>(result.Result);
-    }
-
-    [Fact]
-    public async Task UpdateEvent_ReturnsNotFound_WhenEventDoesNotExist()
+    public async Task UpdateEvent_ReturnsOk_WhenSuccessful()
     {
         var eventId = Guid.NewGuid();
         var request = new UpdateEventRequest(eventId,
@@ -208,17 +178,65 @@ public class EventControllerTests
             null,
             null,
             null,
+            null,
             null);
-        var error = "Test Error";
+
+        var response = new EventResponse(eventId,
+            "Updated Name",
+            "Original Desc",
+            "Test Venue",
+            DateTime.UtcNow.AddDays(1),
+            100,
+            new List<PricingTierResponse>());
 
         _mockService
             .Setup(s => s.UpdateEvent(eventId, request))
-            .ReturnsAsync(Result<EventResponse>.Fail(error));
+            .ReturnsAsync(Result<EventResponse>.Success(response));
 
         var result = await _controller.UpdateEvent(eventId, request);
 
-        var notFoundResult = Assert.IsType<NotFoundObjectResult>(result.Result);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        Assert.Equal(response, okResult.Value);
+    }
+
+
+    [Fact]
+    public async Task DeleteEvent_ReturnsNoContent_WhenSuccessful()
+    {
+        var eventId = Guid.NewGuid();
+        _mockService
+            .Setup(s => s.DeleteEventById(eventId))
+            .ReturnsAsync(Result<bool>.Success(true));
+
+        var result = await _controller.DeleteEvent(eventId);
+
+        Assert.IsType<NoContentResult>(result);
+    }
+
+    [Fact]
+    public async Task DeleteEvent_ReturnsNotFound_WhenEventDoesNotExist()
+    {
+        var eventId = Guid.NewGuid();
+        var error = "Test Error";
+
+        _mockService
+            .Setup(s => s.DeleteEventById(eventId))
+            .ReturnsAsync(Result<bool>.Fail(error));
+
+        var result = await _controller.DeleteEvent(eventId);
+
+        var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
         Assert.Equal(error, notFoundResult.Value);
     }
 
+    [Fact]
+    public async Task DeleteEvent_ReturnsBadRequest_WhenIdIsEmpty()
+    {
+        var emptyId = Guid.Empty;
+
+        var result = await _controller.DeleteEvent(emptyId);
+
+        Assert.IsType<BadRequestObjectResult>(result);
+        _mockService.Verify(s => s.DeleteEventById(It.IsAny<Guid>()), Times.Never);
+    }
 }

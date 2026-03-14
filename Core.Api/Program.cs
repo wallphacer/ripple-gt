@@ -1,3 +1,5 @@
+using Core.Application.Events;
+using Core.Application.Events.Services;
 using Infrastructure;
 using Infrastructure.Configuration;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +19,9 @@ var postgresOptions = builder.Configuration
 
 builder.Services.AddDbContext<EventManagementDbContext>(options =>
     options.UseNpgsql(postgresOptions!.ConnectionString));
+
+builder.Services.AddScoped<IEventsService, EventsService>();
+builder.Services.AddScoped<IEventsRepository, EventsRepository>();
 
 var app = builder.Build();
 
