@@ -1,8 +1,6 @@
 # ripple-gt : Event Management
 
-## About Me
-
-Hello!
+## Hello!
 
 Thank you for taking the time to read this README! And for considering me for this role!
 My name is Keith,
@@ -13,7 +11,7 @@ And I hope we get to work together in the future! :D
 ### Docker
 
 This entire project is dockerised.
-I did this to make it as easy as possible to run on any machine, as well as because I believe developing with it already containerised helps in the long run.
+I did this to make it as easy as possible to run on any machine, I also thing developing an application that's arleady containerised makes it easier to deploy, scale and publish to various cloud providers.
 Building an application with infrastructure and the knowledge of how it well get released / deployed is in my opinion very important.
 
 ### Install Docker Desktop
@@ -66,7 +64,7 @@ It has some drawbacks too, but for this sort of purpose it works well!
 This is just some of the assumptions I made as part of this test.
 I made these purely based on the time it would take to solve, in a real world environment I'd be directing a lot of the questions surrounding these assumptions to a customer, product owner or stake holder to get the most accurate definition of what needs to be done.
 
-- Scale: I assumed a moderate scale, so not TicketMaster or anything similar. That sort of scale would require a vaster degree of infrastructure and orchestration.
+- Scale: I assumed a moderate scale, so not TicketMaster or anything similar. That sort of scale would require a more thought around infrastructure and orchestration.
 - Single Region: This was purely to simplify the design here. A globally distributed system introduces a lot more challenges around consistency.
 - Single Instance: The RowVersion concurrency would not work for horizontal scaling, or at least would introduce a lot more problems. If there were more instances it would require a lot more care and thought into how a user gets their tickets.
 
@@ -76,30 +74,30 @@ I made these purely based on the time it would take to solve, in a real world en
 
 I decided to go for a fairly typical structure for a .NET Web Project (at least typical in my experience).
 
-An API Layer, that handles simple validation & request / response.
-A Service Layer, that handles internal business logic.
-A Repository, for data access to separate database accessing from operating on the entities.
-A Domain project, to contain Entity's and their logic.
-A Infrastructure project, to contain the configuration for database access along with the configuration for the Entities and migrations to the database.
+- An API Layer, that handles simple validation & request / response.
+- A Service Layer, that handles internal business logic.
+- A Repository, separate database access from operating on the Entities.
+- A Domain project, to contain Entity's and their logic.
+- A Infrastructure project, to contain the configuration for database access along with the configuration for the Entities and migrations to the database.
 
 ### Controllers over Minimal API
 
 This is just a preference.
-I find controllers more manageable, and have more experience.
-For a two hour test I thought it best to do what's most comfortable.
+I find controllers more manageable, and have more experience with them.
+For a two hour test I thought it best to do what's most comfortable for me.
 
 ### EF Core
 
 I decided to use EF Core / an ORM over something like Dapper, or writing my own SQL files to generate / create the tables.
 
-I think this increases the developer experience (for the most part, EF Core has it's own headaches), and for a two hour assessment it also allowed me to focus almost entirely on writing code and getting things correct internally.
+I think this improves the developer experience (for the most part, EF Core has it's own headaches), and for a two hour assessment it also allowed me to focus almost entirely on writing code and getting things correct internally.
 
-In a production system there's be a lot to talk about with regards to database management and the best way to access it, but I think EF Core handles 90% of what needs to be done.
+In a production system there's a lot to talk about with regards to database management and the best way to access it, but I think EF Core handles 90% of what needs to be done.
 
 ### Results Pattern
 
 For returning errors / successes back to the API to map to HTTP codes, I typically prefer to use something like the Results pattern.
-For a time boxed exercise like this I could have done something like throwing exception and catching but that's expensive and it never looks that great to me.
+For a time boxed exercise like this I could have done something like throwing exceptions and catching but that's expensive and it never looks that great to me.
 
 I decided to just use Results here for this, but it isn't perfect as the controller cannot differentiate between the different types of failures and respond accordingly.
 
@@ -129,7 +127,7 @@ In a perfect world, we would understand a lot about the system ahead of this:
 
 - How many tickets are there going to be available
 - How popular is this event, is it likely there'll be thousands, hundreds of thousands or millions of people attempting to purchase tickets all at the same time
-- How globally distributed will this connection be
+- How globally distributed will these connections be
 
 For the purposes of this test, I've made some assumptions about the system, and solved the problem in a way that I don't think is necessarily the most optimal way.
 Given that this is meant to be roughly two hours though I think that's ok.
@@ -215,7 +213,7 @@ This is not something I've even approached here but would be vital in a producti
 
 I unfortunately did not have enough time to get to reporting during the time I spent on this task.
 
-This would be a read-only (so NoTracking()) GET endpoint that would sort out the following:
+This would be a read-only (so NoTracking()) GET endpoint that would return the following:
 
 - Total tickets sold
 - Revenue broken down by pricing tier
@@ -253,3 +251,6 @@ Things I never allow AI to do:
 I typically constrict the AI to more localised areas, a single file or something similar, so that I provide the context of what needs to be done as well as the safety guards.
 
 I also made sure I wrote all of this documentation (so that my personality came through).
+
+If you made it this far,
+Thank you for reading and have a nice day!
