@@ -89,6 +89,15 @@ I think this increases the developer experience (for the most part, EF Core has 
 
 In a production system there's be a lot to talk about with regards to database management and the best way to access it, but I think EF Core handles 90% of what needs to be done.
 
+### Results Pattern
+
+For returning errors / successes back to the API to map to HTTP codes, I typically prefer to use something like the Results pattern.
+For a time boxed exercise like this I could have done something like throwing exception and catching but that's expensive and it never looks that great to me.
+
+I decided to just use Results here for this, but it isn't perfect as the controller cannot differentiate between the different types of failures and respond accordingly.
+
+This is something that would need to be addressed in the future if this was going to production.
+
 ### Preventing Overselling
 
 ## Changes I Would Make

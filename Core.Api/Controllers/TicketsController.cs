@@ -1,0 +1,16 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Core.Api.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class TicketsController : ControllerBase
+    {
+        [HttpGet("ping")]
+        public IActionResult Ping()
+        {
+            return Ok(new { Timestamp = DateTime.UtcNow });
+        }
+    }
+}
