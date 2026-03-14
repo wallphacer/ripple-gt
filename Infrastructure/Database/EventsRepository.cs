@@ -15,17 +15,16 @@ public class EventsRepository : IEventsRepository
 
     public async Task<IList<Event>> GetAllEvents()
     {
-        // Purely a View of the objects
-        // We don't need to track these changes
         return await _context.Events
+            .Include(e => e.PricingTiers)
             .AsNoTracking()
             .ToListAsync();
     }
 
     public async Task<Event?> GetByIdAsync(Guid id)
     {
-        // This is actually going to be used to find things that will need to be changed, so we should track
         return await _context.Events
+            .Include(e => e.PricingTiers)
             .FirstOrDefaultAsync(e => e.Id == id);
     }
 
@@ -49,7 +48,6 @@ public class EventsRepository : IEventsRepository
         return true;
     }
 
-    // This function looks ridiculous, but it keeps the interface and API of the repository consistent.
     public async Task<Event?> UpdateAsync(Event eventToUpdate)
     {
         await _context.SaveChangesAsync();
